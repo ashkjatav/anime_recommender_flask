@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Anime Recommender </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Poppins:300,500&amp;display=swap'>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <style>
+
+        body {
+            font-family: "Poppins", sans-serif;
+            font-weight: 300;
+            font-size: 100%;
+            background-color: #ffffff;
+            line-height: 1.5;
+            color: #000;
+        }
+
+        .movie {
+            height: 70vh;
+            margin-top: 15vh;
+            margin-bottom: 15vh;
+            margin-right: 5vh;
+            margin-left: 5vh;
+            display: block;
+            background-color: white;
+            /*border-radius: 20px;*/
+            padding: 1em;
+            width: auto;
+            /*box-shadow: 0px -10px 20px -5px #E2E2E2;*/
+            text-align: center;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        #t01 {
+            width: 100%;
+            background-color: #f1f1c1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="movie">
+    <h2><u>Recommendations:</u></h2>
+    <p>Showing results for: {{ search_name }}</p>
+
+    <table class="movie_table" align="center">
+        <tr>
+            <th>Movie Title</th>
+            <th>Score</th>
+        </tr>
+        <tbody class="table_body">
+        <tr>
+            <td>{{ movie_names[0] }}</td>
+            <td>{{ movie_date[0] }}</td>
+        </tr>
+        <tr>
+            <td>{{ movie_names[1] }}</td>
+            <td>{{ movie_date[1] }}</td>
+        </tr>
+        <tr>
+            <td>{{ movie_names[2] }}</td>
+            <td>{{ movie_date[2] }}</td>
+        </tr>
+        <tr>
+            <td>{{ movie_names[3] }}</td>
+            <td>{{ movie_date[3] }}</td>
+        </tr>
+        <tr>
+            <td>{{ movie_names[4] }}</td>
+            <td>{{ movie_date[4] }}</td>
+        </tr>
+        <tr>
+            <td>{{ movie_names[5] }}</td>
+            <td>{{ movie_date[5] }}</td>
+        </tr>
+        <tr>
+            <td>{{ movie_names[6] }}</td>
+            <td>{{ movie_date[6] }}</td>
+        </tr>
+        <tr>
+            <td>{{ movie_names[7] }}</td>
+            <td>{{ movie_date[7] }}</td>
+        </tr>
+        <tr>
+            <td>{{ movie_names[8] }}</td>
+            <td>{{ movie_date[8] }}</td>
+        </tr>
+        <tr>
+            <td>{{ movie_names[9] }}</td>
+            <td>{{ movie_date[9] }}</td>
+        </tr>
+    </table>
+    <br>
+</div>
+</body>
+</html>

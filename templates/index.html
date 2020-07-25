@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 16px Arial;
+        }
+
+        /*the container must be positioned relative:*/
+        .autocomplete {
+            position: relative;
+            display: inline-block;
+        }
+
+        input {
+            border: 1px solid transparent;
+            background-color: #f1f1f1;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        input[type=text] {
+            background-color: #f1f1f1;
+            width: 100%;
+        }
+
+        input[type=submit] {
+            background-color: DodgerBlue;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            /*position the autocomplete items to be the same width as the container:*/
+            top: 100%;
+            left: 0;
+            right: 0;
+        }
+
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+        }
+
+        /*when hovering an item:*/
+        .autocomplete-items div:hover {
+            background-color: #e9e9e9;
+        }
+
+        /*when navigating through the items using the arrow keys:*/
+        .autocomplete-active {
+            background-color: DodgerBlue !important;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Anime Recommender System</h2>
+
+<p>Select from the following options:</p>
+
+<!--Make sure the form has the autocomplete function switched off:-->
+<form autocomplete="off" action="{{ url_for('main') }}" method="POST">
+    <div class="autocomplete" style="width:300px;">
+        <label for="tv_or_movie">TV or Movie:</label><br>
+        <input list="tv_or_movie" name="tv_or_movie"><br>
+        <datalist id="tv_or_movie">
+            <option value="TV">
+            <option value="Movie/OVA">
+            <option value="Any">
+        </datalist>
+        <label for="anime_name">Anime:</label><br>
+        <input id="anime_name" type="text" name="anime_name" placeholder="Start typing anime name...">
+
+        <!--{#    <input id="myInput2" type="text" name="myCountry" placeholder="Country">#}-->
+    </div>
+    <input type="submit" id="submission_button" value="Submit"/>
+</form>
+
+
+<script>
+    function autocomplete(inp, arr) {
+        /*the autocomplete function takes two arguments,
+        the text field element and an array of possible autocompleted values:*/
+        var currentFocus;
+        /*execute a function when someone writes in the text field:*/
+        inp.addEventListener("input", function (e) {
+            var a, b, i, val = this.value;
+            /*close any already open lists of autocompleted values*/
+            closeAllLists();
+            if (!val) {
+                return false;
+            }
+            currentFocus = -1;
+            /*create a DIV element that will contain the items (values):*/
+            a = document.createElement("DIV");
+            a.setAttribute("id", this.id + "autocomplete-list");
+            a.setAttribute("class", "autocomplete-items");
+            /*append the DIV element as a child of the autocomplete container:*/
+            this.parentNode.appendChild(a);
+            /*for each item in the array...*/
+            for (i = 0; i < arr.length; i++) {
+                /*check if the item starts with the same letters as the text field value:*/
+                if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                    /*create a DIV element for each matching element:*/
+                    b = document.createElement("DIV");
+                    /*make the matching letters bold:*/
+                    b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+                    b.innerHTML += arr[i].substr(val.length);
+                    /*insert a input field that will hold the current array item's value:*/
+                    b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                    /*execute a function when someone clicks on the item value (DIV element):*/
+                    b.addEventListener("click", function (e) {
+                        /*insert the value for the autocomplete text field:*/
+                        inp.value = this.getElementsByTagName("input")[0].value;
+                        /*close the list of autocompleted values,
+                        (or any other open lists of autocompleted values:*/
+                        closeAllLists();
+                    });
+                    a.appendChild(b);
+                }
+            }
+        });
+        /*execute a function presses a key on the keyboard:*/
+        inp.addEventListener("keydown", function (e) {
+            var x = document.getElementById(this.id + "autocomplete-list");
+            if (x) x = x.getElementsByTagName("div");
+            if (e.keyCode == 40) {
+                /*If the arrow DOWN key is pressed,
+                increase the currentFocus variable:*/
+                currentFocus++;
+                /*and and make the current item more visible:*/
+                addActive(x);
+            } else if (e.keyCode == 38) { //up
+                /*If the arrow UP key is pressed,
+                decrease the currentFocus variable:*/
+                currentFocus--;
+                /*and and make the current item more visible:*/
+                addActive(x);
+            } else if (e.keyCode == 13) {
+                /*If the ENTER key is pressed, prevent the form from being submitted,*/
+                e.preventDefault();
+                if (currentFocus > -1) {
+                    /*and simulate a click on the "active" item:*/
+                    if (x) x[currentFocus].click();
+                }
+            }
+        });
+
+        function addActive(x) {
+            /*a function to classify an item as "active":*/
+            if (!x) return false;
+            /*start by removing the "active" class on all items:*/
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = (x.length - 1);
+            /*add class "autocomplete-active":*/
+            x[currentFocus].classList.add("autocomplete-active");
+        }
+
+        function removeActive(x) {
+            /*a function to remove the "active" class from all autocomplete items:*/
+            for (var i = 0; i < x.length; i++) {
+                x[i].classList.remove("autocomplete-active");
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            /*close all autocomplete lists in the document,
+            except the one passed as an argument:*/
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != inp) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+
+        /*execute a function when someone clicks in the document:*/
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+    }
+
+    /*An array containing all the country names in the world:*/
+    var animes = ['Cowboy Bebop', 'Trigun', 'Witch Hunter Robin', 'Beet the Vandel Buster', 'Eyeshield 21', 'Honey and Clover', 'Hungry Heart: Wild Striker', 'Initial D Fourth Stage', 'Monster', 'Naruto', 'One Piece', 'The Prince of Tennis', 'Ring ni Kakero 1', 'School Rumble', 'Desert Punk', 'Texhnolyze', 'Trinity Blood', 'Yakitate!! Japan', 'Zipang', 'Neon Genesis Evangelion', 'Berserk', 'Rurouni Kenshin', '.hack//Sign', 'Ah! My Goddess', 'Battle Doll Angelic Layer', 'Ai Yori Aoshi', 'Arc the Lad', 'Avenger', 'Beck: Mongolian Chop Squad', 'Blue Gender', 'Chobits', 'Chrono Crusade', 'D.N.Angel', 'D.C.~Da Capo~', 'DearS', 'Rozen Maiden', 'Rozen Maiden: Träumend', 'Azumanga Daioh: The Animation', 'Basilisk', 'Black Cat', 'Cluster Edge', 'Full Metal Panic!', 'Full Metal Panic? Fumoffu', 'Full Metal Panic! The Second Raid', 'Gakuen Alice', 'Fafner of the Blue Sky', 'Magical Girl Lyrical Nanoha', "Magical Girl Lyrical Nanoha A's", 'Shuffle!', 'Mobile Suit Gundam', 'Mobile Suit Zeta Gundam', 'Mobile Suit Gundam ZZ', 'Mobile Suit V Gundam', 'Mobile Suit Gundam Wing', 'After War Gundam X', 'Mobile Suit Gundam SEED', 'Mobile Suit Gundam SEED Destiny', '∀ Gundam', 'Mobile Fighter G Gundam', 'Last Exile', 'My-Hime', 'My-Otome', 'Prétear: The New Legend of Snow White', 'Air', 'Aishiteruze Baby★★', 'Red Riding Hood Chacha', 'Ceres, Celestial Legend', 'Boys Be...', 'Hana Yori Dango', 'Jing: King of Bandits', 'Burst Angel', 'Chuuka Ichiban!', 'Corrector Yui', 'The Cosmopolitan Prayers', 'Stellvia', 'Cromartie High School', 'El Hazard: The Alternative World', 'El-Hazard: The Wanderers', 'Final Approach', 'Fruits Basket', 'Fullmetal Alchemist', 'Searching for the Full Moon', 'Mysterious Play', 'Twin Love', 'Futakoi Alternative', 'Gate Keepers', 'Saiyuki', 'Saiyuki Reload', 'Saiyuki Gunlock', 'Getbackers', 'Green Green', 'Gunslinger Girl', 'Hikaru no Go', 'Hunter x Hunter', 'Jinki: Extend', 'Kamikaze Kaitou Jeanne', 'Destiny of the Shrine Maiden', 'Kanon', 'His and Her Circumstances', 'This Ugly Yet Beautiful World', 'Rumbling Hearts', 'Diamond Daydreams', 'Loveless', 'Blood+', 'Solty Rei', 'The Twelve Kingdoms', 'Shaman King', 'X', 'Negima!', 'Maria Watches Over Us', 'The Melody of Oblivion', 'Now and Then, Here and There', 'Peace Maker Kurogane', 'Pita-Ten', 'Power Stone', 'RahXephon', 'Samurai 7', 'Scrapped Princess', 's-CRY-ed', 'Lunar Legend Tsukihime', 'Slam Dunk', 'Strange Dawn', 'Tactics', 'Tenjho Tenge', 'Tokyo Underground', 'Tsubasa RESERVoir CHRoNiCLE', 'Ultramaniac - Magical Girl', 'Vandread', 'Vandread: The Second Stage', 'The Vision of Escaflowne', 'Whistle!', 'Xenosaga The Animation', 'Initial D First Stage', 'Initial D Second Stage', 'Love Hina', 'Maburaho', 'Please Teacher!', 'Please Twins', 'Rizelmine', 'Speed Grapher', 'Cheeky Angel', "Wolf's Rain", 'Yumeria', 'Samurai Champloo', 'Record of Lodoss War: Chronicles of the Heroic Knight', 'R.O.D -The TV-', 'Ranma ½', 'Martian Successor Nadesico', 'Mezzo DSA', 'Dragon Ball', 'Dragon Ball GT', 'Elfen Lied', 'Hell Girl', 'Ninja Nonsense', 'Air Master', 'Shrine of the Morning Mist', 'Cardcaptor Sakura', 'Daa! Daa! Daa!', 'Dan Doh!!', 'Case Closed', "E's Otherwise", 'Eureka Seven', 'Flame of Recca', 'Gankutsuou: The Count of Monte Cristo', 'Genshiken', 'Girls Bravo', 'The Gokusen', 'Gravitation', "Agatha Christie's Great Detectives Poirot and Marple", 'Great Teacher Onizuka', 'Rave Master', 'Haruka: Beyond the Stream of Time – A Tale of the Eight Guardians', 'Strawberry 100%', 'InuYasha', 'Zatch Bell!', 'King From Now On!', 'Madlax', 'Haré+Guu', 'Ikki Tousen', 'Happy☆Lesson (TV)', 'Happy☆Lesson: Advance', 'Fighting Spirit', 'Gunparade March: A New Song for the March', 'Gungrave', 'Bleach', 'Hellsing', 'Gad Guard', 'Noir', "Someday's Dreamers", 'Kiddy Grade', 'Love♥Love?', 'Mahoromatic: Automatic Maiden', 'Mahoromatic ~Something More Beautiful~', 'Viewtiful Joe', 'Requiem from the Darkness', 'Animal Lane', 'Angel Heart', 'Anne of Green Gables', 'Area 88 (TV)', 'Argento Soma', "B'T X", 'Grappler Baki (TV)', 'Beyblade', 'Comic Party', 'Crest of the Stars', 'D.C.S.S. ~Da Capo Second Season~', 'Hoop Days', 'Di Gi Charat', 'Divergence Eve', 'Misaki Chronicle: Divergence Eve', 'Dragon Drive', 'Grenadier: The Beautiful Warrior', '.hack//Legend Of The Twilight', 'Cinderella Boy', 'Future Boy Conan', 'Oh! My Goddess: The Adventures of Mini-Goddess', 'Magical☆Shopping Arcade Abenobashi', 'Adventures On Rainbow Pond', 'Zettai Shounen', "Akahori's Heretical Hour Love Game", 'Three Little Ghosts', 'Ace wo Nerae!', 'Hand Maid May', 'Najica Blitz Tactics', 'Paradise Kiss', 'Paranoia Agent', 'Patlabor: The Mobile Police - The TV Series', 'Peach Girl: Super Pop Love Hurricane', 'Pet Shop of Horrors', 'Petite Princess Yucie', "Piano: The Melody of a Young Girl's Heart", 'Planetes', 'Midori Days', 'Magical Circle Guru Guru', 'Magical Circle Guru Guru 2', 'Mama is Just a Fourth Grade Pupil', 'Marmalade Boy', 'Mythical Detective Loki Ragnarok', 'Ginyuu Mokushiroku Meine Liebe', 'Psychic Academy', 'The Rose of Versailles', 'Serial Experiments Lain', 'Time of Shura', 'Spiral: Bond of Reasoning', 'Starship Operators', 'Tsukuyomi: Moon Phase', 'Twin Spica', 'Emma: A Victorian Romance', 'Double Wish', 'Wild Arms', 'Bottle Fairy', 'Magical Kanan', 'Magical DoReMi', 'Ojamajo Doremi Sharp', 'More! Useless Witch Doremi', 'Useless Witch Doremi Kaboom!', 'Ultimate Girls', 'Shakugan no Shana: Season I', 'Fate/stay night', 'Legend of Himiko', 'Gallery Fake', 'Boogiepop Phantom', 'Burn Up Excess', 'All Purpose Cultural Cat Girl Nuku Nuku TV', 'Excel Saga', 'Galaxy Angel', 'Gantz', 'Gilgamesh', 'H2', 'Haibane Renmei', 'Capeta', 'Suzuka', 'Yu Yu Hakusho: Ghost Files', 'Ai Yori Aoshi: Enishi', 'Gantz: Second Stage', 'Banner of the Stars', 'Banner of the Stars II', 'Outlaw Star', 'Hanaukyou Maid-tai', 'Buzzer Beater', 'Detective School Q', 'Gun x Sword', 'He is My Master', 'Ragnarok the Animation', 'Samurai Deeper Kyo', 'Stratos 4', 'Dirty Pair', 'Kaleido Star', 'Magic Knight Rayearth', 'Revolutionary Girl Utena', 'Maria Watches Over Us: Printemps', 'Tales of Eternia', 'Knight Hunters Eternity', 'Knight Hunters', 'Fantastic Children', 'Best Student Council', 'Mushi-Shi', 'Ghost in the Shell: Stand Alone Complex', 'Karin', 'My Wife is a High School Girl', 'To Heart 2', 'To Heart', 'Tide-Line Blue', 'Skating Rink Kaleidoscope', 'Aria the Animation', 'Aquarion', 'The Law of Ueki', 'Yu-Gi-Oh!', 'Yu-Gi-Oh! GX', 'Kurau Phantom Memory', 'Damekko Doubutsu', "Kino's Journey", 'Girls Bravo: Second Season', 'Strawberry Marshmallow', 'Kamichu!', 'Pani Poni Dash!', 'Sorcerer Hunters', 'Yamibo: Darkness, The Hat and the Travelers of the Books', 'Doraemon', 'Fushigiboshi no☆Futagohime', 'Glass no Kamen', 'Hamtaro', 'I My Me! Strawberry Eggs', 'Kakyusei 2', 'Moeyo Ken TV', 'Sgt. Frog', 'Magical Princess Minky Momo', 'Mahoraba: Heartful days', 'Mermaid Melody: Pichi Pichi Pitch', 'Otogi Zoshi: The Legend of Magatama', 'Pokémon', 'She, The Ultimate Weapon', 'Sailor Moon', 'Sailor Moon S', "Teacher's Time", 'Slayers', 'Slayers Next', 'Tenchi in Tokyo', 'Mousou Kagaku Series: Wandaba Style', 'Wind: A Breath of Heart (TV)', 'Yu☆Gi☆Oh!', 'Grappler Baki: Saidai Tournament-hen', 'Digimon: Digital Monsters', 'Descendants of Darkness', 'Steel Angel Kurumi', 'Steel Angel Kurumi 2', 'Major S2', 'Sakura Wars', 'DNA²', 'The Big O', 'Bubblegum Crisis Tokyo 2040', 'The Irresponsible Captain Tylor', 'Saber Marionette J', 'Magikano', 'Eternal Alice', 'Battle Programmer Shirase', 'Scorched Bread', 'Sexy Commando Gaiden: Sugoiyo!! Masaru-san', 'Noein: to your other self', 'Ayakashi: Japanese Classic Horror', 'Looking Up At The Half-Moon', 'Ginga Nagareboshi Gin', 'Guardian Ninja Mamoru', 'Ah My Buddha', 'PopoloCrois', 'Infinite Ryvius', 'Android Kikaider', 'Legend of Duo', 'Pretty Cure', 'Magical Stage Fancy Lala', "I'm Gonna Be an Angel!", 'Carried by the Wind: Tsukikage Ran', 'Fairy Musketeers', 'Popotan', 'Platonic Chain', 'PetoPeto-san', 'Onmyou Taisenki', 'Madam is a Magical Girl', 'Nurse Angel Ririka SOS', 'Ninja Scroll: The Series', 'Mermaid Forest', 'Nightwalker: The Midnight Detective', 'Shichinin no Nana', 'Mouse', 'Protect Me, Heavenly Moon Guardian!', 'Major S1', "Magic User's Club", 'Legend of Basara', 'Koi Kaze', 'Jubei-chan the Ninja Girl: Secret of the Lovely Eyepatch', 'Jubei-chan 2: The Counterattack of Siberia Yagyu', 'Iketeru Futari', 'Haunted Junction', 'Tsuki wa Higashi ni Hi wa Nishi ni: Operation Sanctuary', 'Hanaukyo Maid Team: La Verite', 'Galaxy Angel Z', 'Galaxy Angel 3', 'Galaxy Angel 4', 'Touhai Densetsu Akagi: Yami ni Maiorita Tensai', 'Girl Meets Girl', 'Koi Koi Seven', 'Lamune', 'Lemon Angel Project', 'Sentimental Journey', 'Shadow Skill: Eigi', 'Angel Tales', 'Tenshi no Shippo Chu!', 'To Heart: Remember My Memories', 'Mew Mew Power', 'Utakata', 'Vampire Princess Miyu', 'Yawara!', 'Burn Up Scramble', 'Canvas 2: Rainbow Colored Sketch', 'Tenchi Muyou!', 'Comic Party Revolution', 'Patapata Hikousen no Bouken', 'Mujin Wakusei Survive', 'Rec', 'Zoids Genesis', 'Funny Faces in High School', 'If I See You in My Dreams', 'Princess Tutu', 'Goldfish Warning!', 'Sunny Ryoko', 'MÄR', 'Sailor Moon R', 'Trouble Chocolate', 'Nanami-chan', 'Binchou-tan', 'Bomberman Jetters', 'The Snow Queen', 'Zoids', 'Zoids: New Century', 'Ginyuu Mokushiroku Meine Liebe Wieder', 'Nanaka 6/17', 'Gasaraki', 'Miami Guns', 'Pugyuru', 'Momo, Girl God of Death', 'Ergo Proxy', 'Brother, Dear Brother', 'Yomigaeru Sora: Rescue Wings', 'Kokoro Toshokan', 'NieA Under 7', 'Ghost in the Shell: Stand Alone Complex 2nd GIG', 'Android Announcer Maico 2010', 'Arjuna', 'Dragon Ball Z', 'Tactical Roar', 'A Little Snow Fairy Sugar', 'Ginsoukikou Ordian', 'Super Heavy God Gravion', 'Sister Princess: Re Pure', 'Sister Princess', 'Shadow Star Narutaru', 'The World of Narue', 'Colorful', 'Kiba', 'School Rumble 2nd Semester', 'The Melancholy of Haruhi Suzumiya', 'Gakuen Heaven', 'Neighborhood Stories', 'Ouran High School Host Club', 'Soul Link', 'Strawberry Panic', 'Utawarerumono', 'Air Gear', 'Gunparade Orchestra', 'Digimon Data Squad', 'Disgaea', 'xxxHOLiC', 'High School Girls', 'Metal Armor Dragonar', 'Tweeny Witches', '.hack//roots', 'Digimon Tamers', 'Street Fighter II: The Animated Series', 'Nana', 'Zegapain', 'Simoun', 'Ah! My Goddess: Flights of Fancy', 'Ah My Buddha Katsu', 'Megami Kouhosei', 'Black Lagoon', 'King of Braves GaoGaiGar', 'Princess Princess', 'Geneshaft', 'Himawari!', 'Ninkuu', 'Fighting Beauty Wulong', 'The Ping-Pong Club', 'Ginga Densetsu Weed', 'Tokko', 'Gintama', 'Ray The Animation', 'Transformers Super-God Masterforce', 'Transformers The Headmasters', 'Transformers Victory', 'Transformers Energon', 'Transformers Cybertron', 'Aura Battler Dunbine', 'Space Runaway Ideon', 'When They Cry', 'Witchblade', 'Inukami!', 'Renkin San-kyuu Magical? Pokaan', 'The Good Witch Of The West', 'Yume Tsukai', 'The Third: Aoi Hitomi no Shoujo', 'Chibi Maruko-chan', 'Magical Meow Meow Taruto', 'Jyu-Oh-Sei: Planet of the Beast King', 'Dino Mech Gaiking', 'The Story of Saiunkoku', 'HeatGuy J', 'The Legend of Condor Hero', 'Legend of the Condor Hero II', 'Virtua Fighter', 'Aria the Natural', 'Hit wo Nerae!', 'Gargoyle of Yoshinaga House', 'Shin Chan', 'Fist of the North Star', 'Fighting Beauty Wulong Rebirth', 'Tsubasa RESERVoir CHRoNiCLE Season Two', 'Yokoyama Mitsuteru Sangokushi', 'Astro Boy (2003)', 'Glass Fleet: The Legend of the Wind of the Universe', 'Ground Defense Force! Mao-chan', 'Shinshaku Sengoku Eiyuu Densetsu: Sanada Juu Yuushi The Animation', 'Kamisama Kazoku', 'Dual! Parallel Trouble Adventure', 'Sailor Moon Sailor Stars', 'Blue Seed', 'Space Pirate Captain Harlock', 'Star Ocean EX', "Le Chevalier D'Eon", 'Orphen', 'Orphen 2: Revenge', 'Mirage of Blaze', 'Kaikan Phrase', 'Generator Gawl', 'Legend of Black Heaven', 'Patalliro Saiyuuki!', 'Saint Beast: Seijuu Kourin-hen', 'Mizuiro Jidai', 'Those Who Hunt Elves', 'Those Who Hunt Elves II', 'SoulTaker']
+
+    /*initiate the autocomplete function on the "myInput" element, and pass along the countries array as possible autocomplete values:*/
+    autocomplete(document.getElementById("anime_name"), animes);
+    // autocomplete(document.getElementById("movie_name2"), movies);
+</script>
+
+</body>
+</html>
