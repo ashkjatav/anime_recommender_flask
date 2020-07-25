@@ -52,7 +52,7 @@ class Prep(object):
     def tv_or_movie(self, df, tv_movie_input='Any'):
         if tv_movie_input == 'TV':
             return df[df['type'] != 'Movie']
-        elif tv_movie_input == 'Movie/OVA':
+        elif tv_movie_input == 'Movie':
             return df[df['type'] == 'Movie']
         elif tv_movie_input == 'Any':
             return df

@@ -10,6 +10,7 @@ utils = Utils()
 
 
 # Set up the main route
+# TODO add an option to read cached preprocess file
 @app.route('/', methods=['GET', 'POST'])
 def main():
     df = prep.read_pickle()
@@ -18,7 +19,7 @@ def main():
 
     if flask.request.method == 'POST':
         anime_name, tv_movie = utils.method_post()
-        df, indices, all_titles = prep.preprocess(df, tv_movie_input='TV')
+        df, indices, all_titles = prep.preprocess(df)
         pred = Predict(df, indices)
         result_final = pred.get_recommendations(anime_name)
         names = []
