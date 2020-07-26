@@ -3,7 +3,6 @@ from recommender.prep import Prep
 from recommender.utils import Utils
 from recommender.predict import Predict
 import config as cfg
-import pandas as pd
 
 app = flask.Flask(__name__, template_folder='templates')
 
