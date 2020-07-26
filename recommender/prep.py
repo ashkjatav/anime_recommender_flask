@@ -54,7 +54,7 @@ class Prep(object):
             df = df.reset_index()
             df['comb_feat'] = df['comb_feat'].apply(self.preprocess_text)
         indices = pd.Series(df.index, index=df['title_english'])
-        all_titles = [df['title_english'][i] for i in indices.values]
+        all_titles = df['title_english'].values
         df = df[['index', 'anime_id', 'title_english', 'type', 'score', 'comb_feat']]
         return df, indices, all_titles
 

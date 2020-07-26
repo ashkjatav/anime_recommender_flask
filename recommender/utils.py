@@ -14,7 +14,6 @@ class Utils(object):
     def method_post(self):
         anime_name = flask.request.form['anime_name']
         tv_or_movie = flask.request.form['type']
-        anime_name = anime_name.title()
         return anime_name, tv_or_movie
 
     def tv_or_movie(self, df, tv_movie_input='Any'):
