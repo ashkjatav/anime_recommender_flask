@@ -19,8 +19,8 @@
         }
 
         .movie {
-            height: 70vh;
-            margin-top: 15vh;
+            height: 30vh;
+            margin-top: 5vh;
             margin-bottom: 15vh;
             margin-right: 5vh;
             margin-left: 5vh;
@@ -33,12 +33,29 @@
             text-align: center;
         }
 
-        table, th, td {
+        table, th {
             border: 1px solid black;
             border-collapse: collapse;
         }
 
-        th, td {
+        td {
+            width: 10em;
+            border: solid 1px green;
+            padding: 0;
+        }
+
+        td a {
+            display: block;
+            height: auto;
+            width: auto;
+            padding: 3px;
+        }
+
+        td a:hover {
+            background-color: yellow;
+        }
+
+        th {
             padding: 15px;
             text-align: left;
         }
@@ -59,47 +76,59 @@
         <tr>
             <th>Movie Title</th>
             <th>Score</th>
+            <th>Link</th>
+
         </tr>
         <tbody class="table_body">
         <tr>
             <td>{{ movie_names[0] }}</td>
             <td>{{ movie_date[0] }}</td>
+            <td><a href={{ anime_id[0] }}>Link</a></td>
         </tr>
         <tr>
             <td>{{ movie_names[1] }}</td>
             <td>{{ movie_date[1] }}</td>
+            <td><a href={{ anime_id[1] }}>Link</a></td>
         </tr>
         <tr>
             <td>{{ movie_names[2] }}</td>
             <td>{{ movie_date[2] }}</td>
+            <td><a href={{ anime_id[2] }}>Link</a></td>
         </tr>
         <tr>
             <td>{{ movie_names[3] }}</td>
             <td>{{ movie_date[3] }}</td>
+            <td><a href={{ anime_id[3] }}>Link</a></td>
         </tr>
         <tr>
             <td>{{ movie_names[4] }}</td>
             <td>{{ movie_date[4] }}</td>
+            <td><a href={{ anime_id[4] }}>Link</a></td>
         </tr>
         <tr>
             <td>{{ movie_names[5] }}</td>
             <td>{{ movie_date[5] }}</td>
+            <td><a href={{ anime_id[5] }}>Link</a></td>
         </tr>
         <tr>
             <td>{{ movie_names[6] }}</td>
             <td>{{ movie_date[6] }}</td>
+            <td><a href={{ anime_id[6] }}>Link</a></td>
         </tr>
         <tr>
             <td>{{ movie_names[7] }}</td>
             <td>{{ movie_date[7] }}</td>
+            <td><a href={{ anime_id[7] }}>Link</a></td>
         </tr>
         <tr>
             <td>{{ movie_names[8] }}</td>
             <td>{{ movie_date[8] }}</td>
+            <td><a href={{ anime_id[8] }}>Link</a></td>
         </tr>
         <tr>
             <td>{{ movie_names[9] }}</td>
             <td>{{ movie_date[9] }}</td>
+            <td><a href={{ anime_id[9] }}>Link</a></td>
         </tr>
     </table>
     <br>

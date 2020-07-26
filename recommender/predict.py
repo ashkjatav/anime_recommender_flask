@@ -1,6 +1,10 @@
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
+from recommender.utils import Utils
+import config as cfg
+
+utils = Utils(cfg.read_cache, cfg.write_cache)
 
 
 class Predict(object):
@@ -10,18 +14,15 @@ class Predict(object):
         self.count_matrix = self.count.fit_transform(self.df['comb_feat'])
         self.indices = indices
 
-    def get_recommendations(self, title):
+    def get_recommendations(self, title, tv_movie_input):
         cosine_sim = cosine_similarity(self.count_matrix, self.count_matrix)
         idx = self.indices[title]
-        sim_scores = list(enumerate(cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:11]
-        movie_indices = [i[0] for i in sim_scores]
-        tit = self.df['title_english'].iloc[movie_indices]
-        # genre_list = df_tv['genre_list'].iloc[movie_indices]
-        scor = self.df['score'].iloc[movie_indices]
-        return_df = pd.DataFrame(columns=['Title', 'Score'])
-        return_df['Title'] = tit
-        # return_df['Genre'] = genre_list
-        return_df['Score'] = scor
-        return return_df
+        data = self.df[['title_english', 'type', 'score', 'anime_id']].copy()
+        data['sim_score'] = cosine_sim[idx]
+        data = utils.tv_or_movie(data, tv_movie_input)
+        data = data.sort_values(['sim_score'], ascending=False)
+        data = data[1:11]
+        data = data[['title_english', 'score', 'anime_id']]
+        data['anime_id'] = data['anime_id'].apply(lambda x: str("https://myanimelist.net/anime/") + str(x))
+        data = data.rename(columns={'title_english': 'Title', 'score': 'Score', 'anime_id': 'Link'})
+        return data

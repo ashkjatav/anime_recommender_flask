@@ -1,4 +1,5 @@
 import re, string
+import os
 from nltk import SnowballStemmer
 import pandas as pd
 import ast
@@ -16,42 +17,50 @@ stopwords = set(i).union(j, my_stopwords)
 
 
 class Prep(object):
-    def __init__(self, anime_pickle):
-        self.dataFile = anime_pickle
+    def __init__(self, anime_pickle, read_cache, write_cache):
+        self.anime_pickle = anime_pickle
+        self.read_cache = read_cache
+        self.write_cache = write_cache
 
-    def read_pickle(self):
-        with open(self.dataFile, 'rb') as f:
-            animes = pickle.load(f)
-            animes = pd.DataFrame(animes.values())
+    def read_data(self):
+        if self.read_cache:
+            animes = pd.read_csv("./data/anime_any.csv")
+        else:
+            with open(os.path.join("./data", self.anime_pickle), 'rb') as f:
+                animes = pickle.load(f)
+                animes = pd.DataFrame(animes.values())
         return animes
 
-    def preprocess(self, df, tv_movie_input='Any'):
+    def preprocess(self, df, tv_movie_input):
         # df[['producer', 'licensor', 'studio', 'genre', 'opening_theme', 'ending_theme']] = df[
         #     ['producer', 'licensor', 'studio', 'genre', 'opening_theme', 'ending_theme']].applymap(
         #     lambda x: ast.literal_eval(x))  #
-        df['genre_list'] = df['genre'].apply(lambda x: [name['name'] for name in x])
-        df['producer_list'] = df['producer'].apply(lambda x: [name['name'] for name in x])
-        df['title_english'] = np.where(df['title_english'].isnull(), df['title'], df['title_english'])
+        if self.read_cache:
+            df = df  # self.tv_or_movie(df, tv_movie_input)
+        else:
 
-        df = self.tv_or_movie(df, tv_movie_input)
-
-        cols = ['title', 'title_english', 'score', 'genre_list', 'producer_list', 'opening_theme', 'ending_theme',
-                'synopsis', 'related']
-        df = df[cols]
-        # df_tv['title_english'] = np.where(df_tv['title_english'].isnull(), df_tv['title'], df_tv['title_english'])
-        df['comb_feat'] = df['genre_list'] + df['producer_list'] + df['opening_theme'] + df[
-            'ending_theme'] + df[
-                              'synopsis'].apply(lambda x: x.split())
-        df['comb_feat'] = df['comb_feat'].apply(lambda x: ' '.join(x))
-        df = df.reset_index()
+            df['genre_list'] = df['genre'].apply(lambda x: [name['name'] for name in x])
+            df['producer_list'] = df['producer'].apply(lambda x: [name['name'] for name in x])
+            df['title_english'] = np.where(df['title_english'].isnull(), df['title'], df['title_english'])
+            df = self.tv_or_movie(df, tv_movie_input)
+            cols = ['anime_id', 'title', 'title_english', 'type', 'score', 'genre_list', 'producer_list',
+                    'opening_theme', 'ending_theme',
+                    'synopsis', 'related']
+            df = df[cols]
+            df['comb_feat'] = df['genre_list'] + df['producer_list'] + df['opening_theme'] + df[
+                'ending_theme'] + df[
+                                  'synopsis'].apply(lambda x: x.split())
+            df['comb_feat'] = df['comb_feat'].apply(lambda x: ' '.join(x))
+            df = df.reset_index()
+            df['comb_feat'] = df['comb_feat'].apply(self.preprocess_text)
         indices = pd.Series(df.index, index=df['title_english'])
-        all_titles = [df['title_english'][i] for i in range(len(df['title_english']))]
-        df['comb_feat'] = df['comb_feat'].apply(self.preprocess_text)
+        all_titles = [df['title_english'][i] for i in indices.values]
+        df = df[['index', 'anime_id', 'title_english', 'type', 'score', 'comb_feat']]
         return df, indices, all_titles
 
     def tv_or_movie(self, df, tv_movie_input='Any'):
         if tv_movie_input == 'TV':
-            return df[df['type'] != 'Movie']
+            return df[df['type'] == 'TV']
         elif tv_movie_input == 'Movie':
             return df[df['type'] == 'Movie']
         elif tv_movie_input == 'Any':
