@@ -3,3 +3,4 @@ sklearn
 nltk
 numpy
 gunicorn
+pandas
