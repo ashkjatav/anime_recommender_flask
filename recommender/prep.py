@@ -5,6 +5,9 @@ import pandas as pd
 import ast
 import pickle
 import numpy as np
+import nltk
+
+nltk.download("stopwords")
 from nltk import SnowballStemmer
 from nltk.corpus import stopwords
 
